@@ -378,7 +378,7 @@ def model(uploaded_file):
                                    "cluster_name": "Customer Group Magnitude"},
                           inplace=True)
 
-    # cardinality_df
+    st.dataframe(cardinality_df)
 
     fig_bar = px.bar(cardinality_df, x="Customer Groups",
                      y="Customer Group Magnitude",
@@ -393,6 +393,8 @@ def model(uploaded_file):
             tickmode='linear',
             tick0=1000,
             dtick=1000))
+
+    st.plotly_chart(fig_bar)
 
 
 def main():
