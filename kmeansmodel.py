@@ -28,12 +28,12 @@ pd.options.mode.chained_assignment = None
 
 
 # **Investigate data**
-def model(n_groups):
+def model(uploaded_file):
     # load data into a dataframe
-    customers_orders = pd.read_csv("Orders - Analysis Task.csv")
+    customers_orders = pd.read_csv(uploaded_file)
 
     # first rows of the dataset
-    # print(customers_orders.head())
+    st.dataframe(customers_orders.head())
 
     # first glance of customers_orders data
     customers_orders.info()
@@ -238,7 +238,7 @@ def model(n_groups):
     # customers.head()
 
     # features we are going to use as an input to the model
-    customers.iloc[:, 3:]
+    # customers.iloc[:, 3:]
 
     # ## Create K-means model
 
@@ -303,7 +303,7 @@ def model(n_groups):
     # ## Update K-Means Clustering
 
     # create clustering model with optimal k=4
-    updated_kmeans_model = KMeans(n_clusters=n_groups)
+    updated_kmeans_model = KMeans(n_clusters=4)
     updated_kmeans_model.fit_predict(customers.iloc[:, 3:])
 
     # ### Add cluster centers to the visualization
@@ -342,7 +342,7 @@ def model(n_groups):
     # add dataframes together
     customers = customers.append(centers_df, ignore_index=True)
 
-    customers.tail()
+    # customers.tail()
 
     # ### Visualize Customer Segmentation
 
@@ -351,7 +351,6 @@ def model(n_groups):
 
     # visualize log_transformation customer segments with a 3D plot
 
-    global fig_three
     fig_three = px.scatter_3d(customers,
                               x="log_products_ordered",
                               y="log_average_return_rate",
@@ -365,7 +364,8 @@ def model(n_groups):
                               symbol="is_center"
                               )
 
-    fig_three.update_layout(title='IRR', autosize=False, width=800, height=800, margin=dict(l=40, r=40, b=40, t=40))
+    fig_three.update_layout(title='Segmented Graph', autosize=False, width=800, height=800,
+                            margin=dict(l=40, r=40, b=40, t=40))
     st.plotly_chart(fig_three)
 
     # ## Check for Cluster Magnitude
@@ -380,12 +380,12 @@ def model(n_groups):
 
     # cardinality_df
 
-    fig = px.bar(cardinality_df, x="Customer Groups",
-                 y="Customer Group Magnitude",
-                 color="Customer Groups",
-                 category_orders={"Customer Groups": ["0", "1", "2", "3"]})
+    fig_bar = px.bar(cardinality_df, x="Customer Groups",
+                     y="Customer Group Magnitude",
+                     color="Customer Groups",
+                     category_orders={"Customer Groups": ["0", "1", "2", "3"]})
 
-    fig.update_layout(xaxis=dict(
+    fig_bar.update_layout(xaxis=dict(
         tickmode='linear',
         tick0=1,
         dtick=1),
@@ -394,14 +394,22 @@ def model(n_groups):
             tick0=1000,
             dtick=1000))
 
-    # fig.show()
-
 
 def main():
-    st.title("Customer Segmenter")
+    st.sidebar.header('User Input Features')
 
-    # clusters = st.number_input('Clusters', step=1.0)
-    model(4)
+    st.sidebar.markdown("""
+    [Example CSV input file](https://raw.githubusercontent.com/dataprofessor/data/master/penguins_example.csv)
+    """)
+
+    # Collects user input features into dataframe
+    uploaded_file = st.sidebar.file_uploader("Upload your input CSV file", type=["csv"])
+    # if uploaded_file is not None:
+    #     input_df = pd.read_csv(uploaded_file)
+
+    st.title("Customer Segmenter")
+    if st.sidebar.button('Segment'):
+        model(uploaded_file)
 
 
 if __name__ == '__main__':
